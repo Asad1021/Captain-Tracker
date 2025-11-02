@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {APP_CONFIG} from '../config/appConfig'
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -65,7 +66,7 @@ const Dashboard = () => {
   const handleMarkIn = (subordinate) => {
     if (!isInRange) {
       alert(
-        "⚠️ OUT OF RANGE!\n\nYou must be within 20 meters of your workplace to mark attendance."
+        `⚠️ OUT OF RANGE!\n\nYou must be within ${APP_CONFIG.GEOFENCE_RADIUS_METERS} meters of your workplace to mark attendance.`
       );
       return;
     }
@@ -77,7 +78,7 @@ const Dashboard = () => {
   const handleMarkOut = (subordinate) => {
     if (!isInRange) {
       alert(
-        "⚠️ OUT OF RANGE!\n\nYou must be within 20 meters of your workplace to mark attendance."
+        `⚠️ OUT OF RANGE!\n\nYou must be within  ${APP_CONFIG.GEOFENCE_RADIUS_METERS} meters of your workplace to mark attendance.`
       );
       return;
     }
@@ -142,7 +143,7 @@ const handleLogout = () => {
             <strong>APP LOCKED - OUT OF RANGE!</strong>
             <p>
               Distance: {distance.toFixed(1)}m from workplace - Return within
-              20m to unlock
+              {APP_CONFIG.GEOFENCE_RADIUS_METERS}m to unlock
             </p>
           </div>
         </div>
@@ -151,7 +152,7 @@ const handleLogout = () => {
       <div className={`dashboard-content ${!isInRange ? "locked" : ""}`}>
         <div className="dashboard-header">
           <div className="header-top">
-            <h2>📊 Captain Dashboard</h2>
+            <h2>Playing Captain Dashboard</h2>
             <div className="header-buttons">
               <button
                 className="deassociate-button"

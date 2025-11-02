@@ -1,6 +1,7 @@
 // src/components/Login.jsx - USING STORAGE SERVICE
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {APP_CONFIG} from '../config/appConfig'
 import { captainsData } from '../data/hardcodedData';
 import './Login.css';
 
@@ -18,7 +19,7 @@ const Login = () => {
   
   keysToRemove.forEach(key => localStorage.removeItem(key));
   
-  console.log('🔄 Session cleared, WORKPLACE_* keys preserved');
+  // console.log('🔄 Session cleared, WORKPLACE_* keys preserved');
 }, []);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -75,7 +76,7 @@ const Login = () => {
               workplace.longitude
             );
             
-            const isInRange = distance <= 20;
+            const isInRange = distance <= APP_CONFIG.GEOFENCE_RADIUS_METERS;
             
             console.log(`📍 Distance: ${distance.toFixed(2)}m | In Range: ${isInRange}`);
             

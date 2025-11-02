@@ -1,6 +1,7 @@
 // src/components/AssociateWorkplace.jsx - FIXED VERSION
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {APP_CONFIG} from '../config/appConfig'
 import "./AssociateWorkplace.css";
 
 const AssociateWorkplace = () => {
@@ -120,8 +121,7 @@ const handleSubmit = async () => {
       timestamp: new Date().toISOString(),
       accuracy: accuracy,
     };
-
-    // DIRECT SAVE - NO SERVICE
+    
     const saveKey = `WORKPLACE_${captain.salaryCode}`;
     localStorage.setItem(saveKey, JSON.stringify(workplace));
     localStorage.setItem("workplace", JSON.stringify(workplace));
@@ -202,7 +202,7 @@ const handleSubmit = async () => {
               accuracy,
             })
           );
-          localStorage.setItem("isInRange", distance <= 20 ? "true" : "false");
+          localStorage.setItem("isInRange", distance <= APP_CONFIG.GEOFENCE_RADIUS_METERS ? "true" : "false");
         },
         (error) => console.error("GPS error:", error),
         {
@@ -231,23 +231,23 @@ const handleSubmit = async () => {
     return R * c;
   };
 
-  // DEBUG FUNCTION - Remove after testing
-  const handleDebug = () => {
-    console.log("=== 🔍 DEBUG INFO ===");
-    console.log("Captain state:", captain);
-    console.log("Captain salaryCode:", captain?.salaryCode);
-    console.log("All localStorage keys:", Object.keys(localStorage));
-    console.log(
-      "Workplace keys:",
-      Object.keys(localStorage).filter((k) => k.startsWith("workplace_"))
-    );
-    if (captain?.salaryCode) {
-      const key = `workplace_${captain.salaryCode}`;
-      console.log(`Checking key: ${key}`);
-      console.log("Value:", localStorage.getItem(key));
-    }
-    alert("Check console for debug info");
-  };
+  //DEBUG FUNCTION - Remove after testing
+  // const handleDebug = () => {
+  //   console.log("=== 🔍 DEBUG INFO ===");
+  //   console.log("Captain state:", captain);
+  //   console.log("Captain salaryCode:", captain?.salaryCode);
+  //   console.log("All localStorage keys:", Object.keys(localStorage));
+  //   console.log(
+  //     "Workplace keys:",
+  //     Object.keys(localStorage).filter((k) => k.startsWith("workplace_"))
+  //   );
+  //   if (captain?.salaryCode) {
+  //     const key = `workplace_${captain.salaryCode}`;
+  //     console.log(`Checking key: ${key}`);
+  //     console.log("Value:", localStorage.getItem(key));
+  //   }
+  //   alert("Check console for debug info");
+  // };
 
   if (!captain) return null;
 
@@ -311,14 +311,14 @@ const handleSubmit = async () => {
             )}
           </button>
 
-          {/* DEBUG BUTTON - Remove after testing */}
+          {/* DEBUG BUTTON - Remove after testing
           <button
             className="submit-button"
             onClick={handleDebug}
             style={{ background: "#333", marginTop: "10px" }}
           >
             🔍 Debug Storage
-          </button>
+          </button> */}
 
           <div className="info-box">
             <p>
