@@ -3,6 +3,57 @@
   min-height: 100vh;
   padding-bottom: 30px;
 }
+/* Add to Dashboard.css */
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.deassociate-button {
+  padding: 10px 20px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.deassociate-button:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: #ee5a6f;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .header-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .deassociate-button,
+  .logout-button {
+    width: 100%;
+  }
+}
 
 .warning-banner {
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
@@ -380,3 +431,44 @@
   font-weight: 600;
   margin-top: 5px;
 }
+/* Add to Dashboard.css */
+
+.warning-banner-locked {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.6);
+  animation: urgentPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.01);
+  }
+}
+
+.dashboard-content.locked {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(50%);
+}
+
+.duration-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+

@@ -1,4 +1,3 @@
-// src/components/Dashboard.jsx - WITH MARK OUT FEATURE
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
@@ -11,10 +10,12 @@ const Dashboard = () => {
   const [markedOut, setMarkedOut] = useState([]);
   const [isInRange, setIsInRange] = useState(true);
   const [distance, setDistance] = useState(0);
+  const [gpsAccuracy, setGpsAccuracy] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const captainData = localStorage.getItem("captain");
+
     const workplaceData = localStorage.getItem("workplace");
 
     if (!captainData || !workplaceData) {
@@ -29,7 +30,6 @@ const Dashboard = () => {
     setWorkplace(workplace);
     setSubordinates(captain.subordinates);
 
-    // Load previously marked attendance
     const savedMarkedIn = localStorage.getItem("markedIn");
     if (savedMarkedIn) {
       setMarkedIn(JSON.parse(savedMarkedIn));
@@ -40,24 +40,33 @@ const Dashboard = () => {
       setMarkedOut(JSON.parse(savedMarkedOut));
     }
 
-    // Monitor distance continuously
-    const distanceInterval = setInterval(() => {
+    const monitorInterval = setInterval(() => {
       const distanceStr = localStorage.getItem("distanceFromWorkplace");
+      const inRangeStr = localStorage.getItem("isInRange");
+      const locationStr = localStorage.getItem("currentLocation");
+
       if (distanceStr) {
         const dist = parseFloat(distanceStr);
         setDistance(dist);
-        setIsInRange(dist <= 20);
+        setIsInRange(inRangeStr === "true");
+      }
+
+      if (locationStr) {
+        const location = JSON.parse(locationStr);
+        setGpsAccuracy(location.accuracy || 0);
       }
     }, 1000);
 
     return () => {
-      clearInterval(distanceInterval);
+      clearInterval(monitorInterval);
     };
   }, [navigate]);
 
   const handleMarkIn = (subordinate) => {
     if (!isInRange) {
-      alert("⚠️ You are out of range! Please return to your workplace.");
+      alert(
+        "⚠️ OUT OF RANGE!\n\nYou must be within 20 meters of your workplace to mark attendance."
+      );
       return;
     }
     localStorage.setItem("selectedSubordinate", JSON.stringify(subordinate));
@@ -67,22 +76,54 @@ const Dashboard = () => {
 
   const handleMarkOut = (subordinate) => {
     if (!isInRange) {
-      alert("⚠️ You are out of range! Please return to your workplace.");
+      alert(
+        "⚠️ OUT OF RANGE!\n\nYou must be within 20 meters of your workplace to mark attendance."
+      );
       return;
     }
     localStorage.setItem("selectedSubordinate", JSON.stringify(subordinate));
     localStorage.setItem("scanOperation", "markOut");
     navigate("/qr-scanner");
   };
+  const handleDeassociateWorkplace = () => {
+    const confirmed = window.confirm(
+      `⚠️ Deassociate Workplace?\n\nCurrent: ${workplace.name}\n\nContinue?`
+    );
 
-  const handleLogout = () => {
-    const watchIdStr = localStorage.getItem("geofenceWatchId");
-    if (watchIdStr) {
-      navigator.geolocation.clearWatch(parseInt(watchIdStr));
+    if (confirmed) {
+      // DIRECT DELETE
+      const deleteKey = `WORKPLACE_${captain.salaryCode}`;
+      localStorage.removeItem(deleteKey);
+      localStorage.removeItem("workplace");
+      localStorage.removeItem("markedIn");
+      localStorage.removeItem("markedOut");
+
+      console.log("🗑️ DELETED:", deleteKey);
+
+      alert("✅ Workplace removed!");
+      navigate("/associate-workplace");
     }
-    localStorage.clear();
-    navigate("/");
   };
+
+const handleLogout = () => {
+  const intervalIdStr = localStorage.getItem('gpsIntervalId');
+  if (intervalIdStr) {
+    navigator.geolocation.clearWatch(parseInt(intervalIdStr));
+  }
+  
+  // Only clear session data, NOT saved workplaces
+  const keysToRemove = [
+  'captain', 'workplace',
+    'currentLocation', 'distanceFromWorkplace', 'isInRange',
+    'gpsError', 'wasInRange', 'gpsIntervalId'
+  ];
+  
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  console.log('🚪 Logged out - WORKPLACE_* keys preserved');
+  navigate('/');
+};
+
 
   const pendingSubordinates = subordinates.filter(
     (sub) =>
@@ -95,24 +136,33 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       {!isInRange && (
-        <div className="warning-banner">
-          <span className="warning-icon">⚠️</span>
+        <div className="warning-banner-locked">
+          <span className="warning-icon">🔒</span>
           <div>
-            <strong>Out of Range!</strong>
+            <strong>APP LOCKED - OUT OF RANGE!</strong>
             <p>
-              Distance: {distance.toFixed(1)}m - Attendance marking disabled
+              Distance: {distance.toFixed(1)}m from workplace - Return within
+              20m to unlock
             </p>
           </div>
         </div>
       )}
 
-      <div className="dashboard-content">
+      <div className={`dashboard-content ${!isInRange ? "locked" : ""}`}>
         <div className="dashboard-header">
           <div className="header-top">
             <h2>📊 Captain Dashboard</h2>
-            <button className="logout-button" onClick={handleLogout}>
-              Logout
-            </button>
+            <div className="header-buttons">
+              <button
+                className="deassociate-button"
+                onClick={handleDeassociateWorkplace}
+              >
+                🗑️ Deassociate
+              </button>
+              <button className="logout-button" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
           </div>
 
           <div className="captain-details">
@@ -129,14 +179,20 @@ const Dashboard = () => {
               <span className="detail-value">{workplace.name}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Status:</span>
+              <span className="detail-label">GPS Status:</span>
               <span
                 className={`status-badge ${
                   isInRange ? "in-range" : "out-range"
                 }`}
               >
-                {isInRange ? "✓ In Range" : "✗ Out of Range"}
+                {isInRange
+                  ? `✓ In Range (${distance.toFixed(0)}m)`
+                  : `✗ Out of Range (${distance.toFixed(0)}m)`}
               </span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">GPS Accuracy:</span>
+              <span className="detail-value">{Math.round(gpsAccuracy)}m</span>
             </div>
           </div>
         </div>
@@ -239,7 +295,6 @@ const Dashboard = () => {
                 </div>
               ) : (
                 markedOut.map((sub) => {
-                  // Calculate duration
                   const calculateDuration = (startTime, endTime) => {
                     const start = new Date(startTime);
                     const end = new Date(endTime);

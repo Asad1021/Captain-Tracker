@@ -1,29 +1,33 @@
-// src/components/AssociateWorkplace.jsx - GPS PRECISION WITH SMART UX
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './AssociateWorkplace.css';
+// src/components/AssociateWorkplace.jsx - FIXED VERSION
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./AssociateWorkplace.css";
 
 const AssociateWorkplace = () => {
-  const [workplaceName, setWorkplaceName] = useState('');
+  const [workplaceName, setWorkplaceName] = useState("");
   const [captain, setCaptain] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [locationError, setLocationError] = useState('');
-  const [locationStatus, setLocationStatus] = useState('');
+  const [locationError, setLocationError] = useState("");
+  const [locationStatus, setLocationStatus] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const captainData = localStorage.getItem('captain');
+    const captainData = localStorage.getItem("captain");
     if (!captainData) {
-      navigate('/');
+      navigate("/");
       return;
     }
-    setCaptain(JSON.parse(captainData));
+    const parsedCaptain = JSON.parse(captainData);
+    setCaptain(parsedCaptain);
+    
+    console.log("✅ Captain loaded:", parsedCaptain);
+    console.log("📝 Salary Code:", parsedCaptain.salaryCode);
   }, [navigate]);
 
   const getGPSLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported'));
+        reject(new Error("Geolocation is not supported"));
         return;
       }
 
@@ -31,26 +35,30 @@ const AssociateWorkplace = () => {
       let attempts = 0;
       const maxAttempts = 3;
 
-      setLocationStatus('📡 Acquiring GPS signal...');
+      setLocationStatus("📡 Acquiring GPS signal...");
 
       const tryGetLocation = () => {
         attempts++;
-        
+
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const accuracy = position.coords.accuracy;
-            
-            // If we have good accuracy (< 20m) or reached max attempts, use it
+
             if (accuracy < 20 || attempts >= maxAttempts) {
-              setLocationStatus(`✅ GPS acquired! Accuracy: ${Math.round(accuracy)}m`);
+              setLocationStatus(
+                `✅ GPS acquired! Accuracy: ${Math.round(accuracy)}m`
+              );
               resolve(position);
             } else {
-              // Try to get better accuracy
               bestPosition = position;
-              setLocationStatus(`📡 Refining GPS... (${Math.round(accuracy)}m accuracy, attempt ${attempts}/${maxAttempts})`);
-              
+              setLocationStatus(
+                `📡 Refining GPS... (${Math.round(
+                  accuracy
+                )}m accuracy, attempt ${attempts}/${maxAttempts})`
+              );
+
               if (attempts < maxAttempts) {
-                setTimeout(tryGetLocation, 1000); // Try again after 1 second
+                setTimeout(tryGetLocation, 1000);
               } else {
                 resolve(bestPosition);
               }
@@ -58,19 +66,20 @@ const AssociateWorkplace = () => {
           },
           (error) => {
             if (bestPosition) {
-              // Use best position we have
               resolve(bestPosition);
             } else if (attempts < maxAttempts) {
-              setLocationStatus(`⚠️ GPS attempt ${attempts} failed, retrying...`);
+              setLocationStatus(
+                `⚠️ GPS attempt ${attempts} failed, retrying...`
+              );
               setTimeout(tryGetLocation, 1000);
             } else {
               reject(error);
             }
           },
           {
-            enableHighAccuracy: true, // USE GPS HARDWARE
-            timeout: 15000, // 15 seconds per attempt
-            maximumAge: 0 // Force fresh GPS reading
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
           }
         );
       };
@@ -79,124 +88,132 @@ const AssociateWorkplace = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!workplaceName.trim()) {
-      alert('Please enter workplace name');
-      return;
-    }
+const handleSubmit = async () => {
+  if (!workplaceName.trim()) {
+    alert("Please enter workplace name");
+    return;
+  }
 
-    setLoading(true);
-    setLocationError('');
-    setLocationStatus('🛰️ Initializing GPS...');
+  setLoading(true);
+  setLocationError("");
+  setLocationStatus("🛰️ Initializing GPS...");
 
-    try {
-      const position = await getGPSLocation();
-      const { latitude, longitude, accuracy } = position.coords;
-      
-      if (accuracy > 50) {
-        const confirmProceed = window.confirm(
-          `⚠️ GPS Accuracy Warning\n\n` +
-          `Current accuracy: ${Math.round(accuracy)} meters\n\n` +
-          `For best results, we recommend:\n` +
-          `• Move closer to a window\n` +
-          `• Ensure clear view of sky\n` +
-          `• Wait a few moments\n\n` +
-          `Proceed with current accuracy?`
-        );
-        
-        if (!confirmProceed) {
-          setLoading(false);
-          setLocationStatus('');
-          return;
-        }
-      }
+  try {
+    const position = await getGPSLocation();
+    const { latitude, longitude, accuracy } = position.coords;
 
-      const workplace = {
-        name: workplaceName,
-        latitude,
-        longitude,
-        timestamp: new Date().toISOString(),
-        accuracy: accuracy
-      };
-
-      localStorage.setItem('workplace', JSON.stringify(workplace));
-      
-      // Update geofencing with workplace location
-      updateGeofencing(workplace);
-      
-      setLoading(false);
-      
-      alert(
-        `✅ Workplace location saved!\n\n` +
-        `🛰️ GPS Coordinates:\n` +
-        `Latitude: ${latitude.toFixed(6)}\n` +
-        `Longitude: ${longitude.toFixed(6)}\n\n` +
-        `📍 Accuracy: ${Math.round(accuracy)} meters`
+    if (accuracy > 50) {
+      const confirmProceed = window.confirm(
+        `⚠️ GPS Accuracy Warning\n\nCurrent accuracy: ${Math.round(accuracy)} meters\n\nProceed?`
       );
-      
-      navigate('/dashboard');
-    } catch (error) {
-      setLoading(false);
-      handleLocationError(error);
+      if (!confirmProceed) {
+        setLoading(false);
+        setLocationStatus("");
+        return;
+      }
     }
-  };
+
+    const workplace = {
+      name: workplaceName,
+      latitude,
+      longitude,
+      timestamp: new Date().toISOString(),
+      accuracy: accuracy,
+    };
+
+    // DIRECT SAVE - NO SERVICE
+    const saveKey = `WORKPLACE_${captain.salaryCode}`;
+    localStorage.setItem(saveKey, JSON.stringify(workplace));
+    localStorage.setItem("workplace", JSON.stringify(workplace));
+    
+    console.log("✅ SAVED TO:", saveKey);
+    console.log("✅ DATA:", workplace);
+
+    updateGeofencing(workplace);
+    setLoading(false);
+
+    alert(`✅ Workplace "${workplaceName}" saved!`);
+    navigate("/dashboard");
+  } catch (error) {
+    setLoading(false);
+    handleLocationError(error);
+  }
+};
+
 
   const handleLocationError = (error) => {
-    let errorMessage = '';
-    
+    let errorMessage = "";
+
     switch (error.code) {
-      case 1: // PERMISSION_DENIED
-        errorMessage = 'Location permission denied. Please enable location access in your browser settings.';
+      case 1:
+        errorMessage =
+          "Location permission denied. Please enable location access in your browser settings.";
         break;
-      case 2: // POSITION_UNAVAILABLE
-        errorMessage = 'GPS signal unavailable. Please:\n• Move to an open area\n• Ensure GPS is enabled\n• Check if you\'re indoors (GPS works poorly indoors)';
+      case 2:
+        errorMessage =
+          "GPS signal unavailable. Please:\n• Move to an open area\n• Ensure GPS is enabled\n• Check if you're indoors (GPS works poorly indoors)";
         break;
-      case 3: // TIMEOUT
-        errorMessage = 'GPS timeout. Please:\n• Move closer to a window\n• Ensure clear sky view\n• Try again in a moment';
+      case 3:
+        errorMessage =
+          "GPS timeout. Please:\n• Move closer to a window\n• Ensure clear sky view\n• Try again in a moment";
         break;
       default:
-        errorMessage = 'Unable to get GPS location. Please check your device settings.';
+        errorMessage =
+          "Unable to get GPS location. Please check your device settings.";
     }
-    
+
     alert(errorMessage);
-    setLocationError('GPS location failed. Please ensure GPS is enabled and you have a clear sky view.');
-    setLocationStatus('');
+    setLocationError(
+      "GPS location failed. Please ensure GPS is enabled and you have a clear sky view."
+    );
+    setLocationStatus("");
   };
 
   const updateGeofencing = (workplace) => {
-    const watchIdStr = localStorage.getItem('geofenceWatchId');
-    if (watchIdStr) {
-      const watchId = parseInt(watchIdStr);
-      navigator.geolocation.clearWatch(watchId);
+    const intervalIdStr = localStorage.getItem("gpsIntervalId");
+    if (intervalIdStr) {
+      clearInterval(parseInt(intervalIdStr));
     }
 
-    // Continuous GPS tracking for precise geofencing
-    const newWatchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const distance = calculateDistance(
-          latitude,
-          longitude,
-          workplace.latitude,
-          workplace.longitude
-        );
-        
-        localStorage.setItem('distanceFromWorkplace', distance.toString());
-        localStorage.setItem('currentLocation', JSON.stringify({ 
-          latitude, 
-          longitude,
-          accuracy: position.coords.accuracy 
-        }));
-      },
-      (error) => console.error('Geofencing error:', error),
-      {
-        enableHighAccuracy: true, // Continuous GPS tracking
-        timeout: 10000,
-        maximumAge: 5000
-      }
-    );
+    // let updateCount = 0;
 
-    localStorage.setItem('geofenceWatchId', newWatchId.toString());
+    const trackingInterval = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // updateCount++;
+          const { latitude, longitude, accuracy } = position.coords;
+          const distance = calculateDistance(
+            latitude,
+            longitude,
+            workplace.latitude,
+            workplace.longitude
+          );
+
+          // console.log(
+          //   `🛰️ Update #${updateCount}: ${distance.toFixed(2)}m from workplace`
+          // );
+
+          localStorage.setItem("distanceFromWorkplace", distance.toString());
+          localStorage.setItem(
+            "currentLocation",
+            JSON.stringify({
+              latitude,
+              longitude,
+              accuracy,
+            })
+          );
+          localStorage.setItem("isInRange", distance <= 20 ? "true" : "false");
+        },
+        (error) => console.error("GPS error:", error),
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    }, 1000);
+
+    localStorage.setItem("gpsIntervalId", trackingInterval.toString());
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -212,6 +229,24 @@ const AssociateWorkplace = () => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
+  };
+
+  // DEBUG FUNCTION - Remove after testing
+  const handleDebug = () => {
+    console.log("=== 🔍 DEBUG INFO ===");
+    console.log("Captain state:", captain);
+    console.log("Captain salaryCode:", captain?.salaryCode);
+    console.log("All localStorage keys:", Object.keys(localStorage));
+    console.log(
+      "Workplace keys:",
+      Object.keys(localStorage).filter((k) => k.startsWith("workplace_"))
+    );
+    if (captain?.salaryCode) {
+      const key = `workplace_${captain.salaryCode}`;
+      console.log(`Checking key: ${key}`);
+      console.log("Value:", localStorage.getItem(key));
+    }
+    alert("Check console for debug info");
   };
 
   if (!captain) return null;
@@ -254,19 +289,15 @@ const AssociateWorkplace = () => {
           </div>
 
           {locationStatus && (
-            <div className="status-message">
-              {locationStatus}
-            </div>
+            <div className="status-message">{locationStatus}</div>
           )}
 
           {locationError && (
-            <div className="error-message">
-              {locationError}
-            </div>
+            <div className="error-message">{locationError}</div>
           )}
 
-          <button 
-            className="submit-button" 
+          <button
+            className="submit-button"
             onClick={handleSubmit}
             disabled={loading}
           >
@@ -276,12 +307,23 @@ const AssociateWorkplace = () => {
                 Getting GPS Location...
               </>
             ) : (
-              '🛰️ Get GPS Location & Continue'
+              "🛰️ Get GPS Location & Continue"
             )}
           </button>
 
+          {/* DEBUG BUTTON - Remove after testing */}
+          <button
+            className="submit-button"
+            onClick={handleDebug}
+            style={{ background: "#333", marginTop: "10px" }}
+          >
+            🔍 Debug Storage
+          </button>
+
           <div className="info-box">
-            <p>🛰️ <strong>GPS Hardware will be used for precise location</strong></p>
+            <p>
+              🛰️ <strong>GPS Hardware will be used for precise location</strong>
+            </p>
             <p>📍 Target accuracy: Less than 20 meters</p>
             <p>⚠️ For best GPS signal:</p>
             <ul>
