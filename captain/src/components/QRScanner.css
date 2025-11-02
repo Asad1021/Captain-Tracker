@@ -1,0 +1,295 @@
+/* src/components/QRScanner.css - UPDATED */
+.scanner-container {
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+}
+
+.scanner-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 600px;
+  overflow: hidden;
+  animation: slideUp 0.5s ease-out;
+}
+
+.scanner-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.scanner-header h2 {
+  font-size: 26px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.scanner-header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.selected-info {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px 30px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.info-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selected-subordinate {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #667eea;
+}
+
+.selected-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.selected-code {
+  font-size: 16px;
+  color: #667eea;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.scan-error {
+  background: #fee;
+  color: #c33;
+  padding: 15px 30px;
+  border-left: 4px solid #c33;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.8;
+  animation: shake 0.5s ease-in-out;
+  white-space: pre-line;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.qr-reader {
+  padding: 30px;
+  min-height: 300px;
+}
+
+/* Override html5-qrcode default styles */
+#qr-reader {
+  border: none !important;
+}
+
+#qr-reader__dashboard_section {
+  padding: 0 !important;
+}
+
+#qr-reader__dashboard_section_csr {
+  text-align: center !important;
+}
+
+#qr-reader__dashboard_section_csr > button,
+#qr-reader__camera_selection {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  margin: 10px 5px !important;
+  transition: all 0.3s ease !important;
+}
+
+#qr-reader__camera_selection {
+  max-width: 100% !important;
+  padding: 10px 16px !important;
+}
+
+#qr-reader__dashboard_section_csr > button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+#qr-reader video {
+  border-radius: 12px !important;
+  border: 3px solid #667eea !important;
+}
+
+#qr-reader__scan_region {
+  border-radius: 12px !important;
+}
+
+#qr-reader__status_span {
+  padding: 10px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+.scanner-actions {
+  padding: 0 30px 20px 30px;
+}
+
+.cancel-button {
+  width: 100%;
+  padding: 14px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+}
+
+.scanner-instructions {
+  background: #f8f9fa;
+  padding: 25px 30px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.scanner-instructions h4 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.scanner-instructions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scanner-instructions li {
+  padding: 8px 0;
+  padding-left: 25px;
+  position: relative;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.scanner-instructions li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #66bb6a;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.scanner-instructions strong {
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 480px) {
+  .scanner-container {
+    padding: 0;
+    padding-top: 20px;
+  }
+
+  .scanner-card {
+    border-radius: 0;
+  }
+
+  .qr-reader {
+    padding: 20px;
+  }
+
+  .scanner-actions {
+    padding: 0 20px 20px 20px;
+  }
+
+  .scanner-instructions {
+    padding: 20px;
+  }
+}
+
+.mark-out-header {
+  background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%) !important;
+}
+
+.mark-out-border {
+  border-color: #42a5f5 !important;
+}
+
+.selected-code {
+  font-size: 16px;
+  color: #667eea;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.mark-out-border .selected-code {
+  color: #1976d2;
+}
+/* src/components/QRScanner.css - ADD IN TIME DISPLAY STYLING */
+/* ... keep all previous CSS and add these new styles ... */
+
+.in-time-display {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(66, 165, 245, 0.1);
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 600;
+  border-left: 3px solid #1976d2;
+}
+
+.selected-subordinate {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #667eea;
+}
+
+.mark-out-border {
+  border-color: #42a5f5 !important;
+}
+
+.selected-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.selected-code {
+  font-size: 16px;
+  color: #667eea;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.mark-out-border .selected-code {
+  color: #1976d2;
+}
